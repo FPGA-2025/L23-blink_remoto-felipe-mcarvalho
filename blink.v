@@ -1,29 +1,55 @@
 module Blink #(
-    parameter CLK_FREQ = 25_000_000 
+    parameter CLK_FREQ = 25_000_000
 ) (
     input wire clk,
     input wire rst_n,
     output reg [7:0] leds
 );
 
-localparam ONE_SECOND  = CLK_FREQ;
-localparam HALF_SECOND = CLK_FREQ / 2;
+localparam DELAY = CLK_FREQ / 4;
 
 reg [31:0] counter;
+reg [2:0] blink_count;
+reg [2:0] state;
+reg leds_on;
 
-always @(posedge clk ) begin
+always @(posedge clk) begin
     if (!rst_n) begin
-        counter <= 32'h0;
-        leds     <= 8'b0;
+        counter     <= 0;
+        blink_count <= 0;
+        state       <= 0;
+        leds        <= 0;
+        leds_on     <= 0;
     end else begin
-        if (counter >= HALF_SECOND - 1) begin
-            counter <= 32'h0;
-            leds[0]     <= ~leds[0];
-            leds[3]     <= ~leds[3];
+        if (counter >= DELAY) begin
+            counter <= 0;
+            leds_on <= ~leds_on;
+
+            if (leds_on)
+                blink_count <= blink_count + 1;
+
+            if (leds_on)
+                case (state)
+                    0: leds <= 8'b00000001;
+                    1: leds <= 8'b00000110;
+                    2: leds <= 8'b00000111;
+                    3: leds <= 8'b00001111;
+                    4: leds <= 8'b00011111;
+                    default: leds <= 8'b0;
+                endcase;
+            else
+                leds <= 8'b0;
+
+            if (blink_count >= state + 1 && leds_on) begin
+                blink_count <= 0;
+                state <= state + 1;
+                if (state >= 4)
+                    state <= 0;
+            end
         end else begin
             counter <= counter + 1;
         end
     end
 end
-    
+
 endmodule
