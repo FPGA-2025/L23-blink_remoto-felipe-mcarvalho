@@ -1,5 +1,5 @@
 `timescale 1ns/1ns
-module tb();
+module blink_tb();
 
 reg clk, rst_n;
 wire [7:0] leds;
@@ -11,9 +11,7 @@ initial begin
     rst_n = 0;
     
     #2 rst_n = 1;
-    #1000 
-    $display("=== OK");
-    $finish;
+    #1000 $finish;
 end
 
 Blink #(
