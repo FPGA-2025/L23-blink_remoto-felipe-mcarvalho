@@ -25,31 +25,33 @@ always @(posedge clk) begin
             counter <= 0;
             leds_on <= ~leds_on;
 
-            if (leds_on)
+            if (leds_on) begin
                 blink_count <= blink_count + 1;
 
-            if (leds_on)
                 case (state)
                     0: leds <= 8'b00000001;
                     1: leds <= 8'b00000110;
                     2: leds <= 8'b00000111;
                     3: leds <= 8'b00001111;
                     4: leds <= 8'b00011111;
-                    default: leds <= 8'b0;
-                endcase;
-            else
-                leds <= 8'b0;
+                    default: leds <= 8'b00000000;
+                endcase
+            end else begin
+                leds <= 8'b00000000;
+            end
 
-            if (blink_count >= state + 1 && leds_on) begin
+            if ((blink_count >= state + 1) && leds_on) begin
                 blink_count <= 0;
-                state <= state + 1;
                 if (state >= 4)
                     state <= 0;
+                else
+                    state <= state + 1;
             end
         end else begin
             counter <= counter + 1;
         end
     end
 end
+
 
 endmodule
